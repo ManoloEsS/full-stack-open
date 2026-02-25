@@ -4,30 +4,30 @@ sequenceDiagram
 
     browser->>server: POST https://studies.cs.helsinki.fi/exampleapp/new_note (content=<text>)
     activate server
-    server-->>browser: 302 Found: redirect to Location: /exampleapp/notes
+    server-->>browser: 302 Found (redirect to Location: /exampleapp/notes)
     deactivate server
     Note left of server: Server stores the note and redirects
 
     browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/notes
     activate server
-    server-->>browser: 200 OK: HTML document
+    server-->>browser: 200 OK (HTML document)
     deactivate server
     Note right of browser: Notes page is loaded
 
     browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/main.css
     activate server
-    server-->>browser: 304 Not Modified: Cached CSS is used
+    server-->>browser: 304 Not Modified (Cached CSS is used)
     deactivate server
 
     browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/main.js
     activate server
-    server-->>browser: 304 Not Modified: Cached JS is used
+    server-->>browser: 304 Not Modified (Cached JS is used)
     deactivate server
     Note right of browser: The browser starts executing the JavaScript code that fetches the JSON from the server
 
     browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/data.json
     activate server
-    server-->>browser: 200 OK: [{ "content": "new note", "date": "2026-02-24T12:53:54.216Z" }, ... ]
+    server-->>browser: 200 OK (JSON array of notes)
     deactivate server
     Note right of browser: JS renders notes from the JSON response
 
