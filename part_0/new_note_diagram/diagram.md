@@ -6,7 +6,7 @@ sequenceDiagram
     activate server
     server-->>browser: 302 Found: redirect to Location: /exampleapp/notes
     deactivate server
-    Note right of browser: Server stores the note and redirects
+    Note left of server: Server stores the note and redirects
 
     browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/notes
     activate server
@@ -35,4 +35,4 @@ sequenceDiagram
     activate server
     server-->>browser: 404 Not Found
     deactivate server
-    Note right of browser: The GET request cannot find the icon path, server doesn't have it
+    Note left of server: The GET request cannot find the icon path, server doesn't have it
