@@ -2,9 +2,9 @@ sequenceDiagram
     participant browser
     participant server
 
-    browser->>server: POST https://studies.cs.helsinki.fi/exampleapp/new_note (note=content)
+    browser->>server: POST https://studies.cs.helsinki.fi/exampleapp/new_note (content=<text>)
     activate server
-    server-->>browser: 302 redirect to Location: /exampleapp/notes
+    server-->>browser: 302 Found: redirect to Location: /exampleapp/notes
     deactivate server
     Note right of browser: Server stores the note and redirects
 
