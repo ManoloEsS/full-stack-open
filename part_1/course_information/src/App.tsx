@@ -1,39 +1,53 @@
 const App = () => {
-    const course = 'Half Stack application development'
-    const content1 = { name: "Fundamentals of React", exercises: 10 }
-    const content2 = { name: "Using props to pass data", exercises: 7 }
-    const content3 = { name: "State of a component", exercises: 14 }
-
+    const course = {
+        name: 'Half Stack application development',
+        parts: [
+            {
+                name: "Fundamentals of React",
+                exercises: 10
+            },
+            {
+                name: "Using props to pass data",
+                exercises: 7
+            },
+            {
+                name: "State of a component",
+                exercises: 14
+            }
+        ]
+    }
     return (
         <div>
             <Header course={course} />
-            <Part part={content1} />
-            <Part part={content2} />
-            <Part part={content3} />
-            <Total a={content1.exercises} b={content2.exercises} c={content3.exercises} />
-        </div>
+            <Content course={course} />
+            <Total course={course} />
+        </div >
     )
 }
 
-const Header = ({ course }: { course: string }) => {
+const Header = ({ course }: { course: { name: string; parts: { name: string; exercises: number }[] } }) => {
     return (
-        <h1>{course}</h1>
+        <h1>{course.name}</h1>
     )
 }
 
-const Part = ({ part }: { part: { name: string; exercises: number } }) => {
+// const Part = ({ part }: { part: { name: string; exercises: number } }) => {
+//     return (
+//         <p>
+//             {part.name} {part.exercises}
+//         </p>
+//     )
+// }
+
+const Content = ({ course }: { course: { name: string; parts: { name: string; exercises: number }[] } }) => {
     return (
-        <p>
-            {part.name} {part.exercises}
-        </p>
+        course.parts.map(p => <p>{p.name} {p.exercises}</p>)
     )
 }
 
-const Total = ({ a, b, c }: { a: number; b: number; c: number }) => {
+const Total = ({ course }: { course: { name: string; parts: { name: string; exercises: number }[] } }) => {
     return (
-        <p>
-            Number of exercises {a + b + c}
-        </p>
+        <p>Number of exercises {course.parts[0].exercises + course.parts[1].exercises + course.parts[2].exercises}</p>
     )
 }
 
