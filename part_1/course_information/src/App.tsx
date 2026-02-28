@@ -9,7 +9,7 @@ const App = () => {
 
     return (
         <div>
-            <h1>{course}</h1>
+            <Header course={course} />
             <p>
                 {part1} {exercises1}
             </p>
@@ -23,5 +23,12 @@ const App = () => {
         </div>
     )
 }
+
+const Header = ({ course }: { course: string }) => {
+    return (
+        <h1>{course}</h1>
+    )
+}
+
 
 export default App
