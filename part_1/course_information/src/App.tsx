@@ -31,14 +31,6 @@ const Header = ({ course }: { course: { name: string; parts: { name: string; exe
     )
 }
 
-// const Part = ({ part }: { part: { name: string; exercises: number } }) => {
-//     return (
-//         <p>
-//             {part.name} {part.exercises}
-//         </p>
-//     )
-// }
-
 const Content = ({ course }: { course: { name: string; parts: { name: string; exercises: number }[] } }) => {
     return (
         course.parts.map(p => <p>{p.name} {p.exercises}</p>)
