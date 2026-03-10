@@ -1,23 +1,36 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Persons, { type Person } from "./components/Persons"
 import Filter from "./components/Filter"
 import ContactForm from './components/Form'
+import axios from 'axios'
 
 
 const App = () => {
-    const [persons, setPersons] = useState<Person[]>([
-        {
-            name: 'Arto Hellas',
-            number: '464-456-4566',
-            id: 2
-        }
-    ])
-    // TODO: all state in app
+    const [persons, setPersons] = useState<Person[]>([])
+    // all state in app
     const [newName, setNewName] = useState('')
     const [newNumber, setNewNumber] = useState('')
     const [filter, setFilter] = useState("")
 
-    // TODO: all handlers in app
+    // const hook = () => {
+    //     axios
+    //         .get("http://localhost:3001/persons")
+    //         .then(response => {
+    //             setPersons(response.data)
+    //         })
+    // }
+    //
+    // useEffect(hook, [])
+
+    useEffect(() => {
+        axios
+            .get("http://localhost:3001/persons")
+            .then(response => {
+                setPersons(response.data)
+            })
+    }, [])
+
+    // all handlers in app
     const addPerson = (event: any) => {
         event.preventDefault()
         if (newName === "") {
@@ -54,26 +67,18 @@ const App = () => {
         setFilter(event.target.value)
     }
 
-    // TODO: refactor, extract components, pass handlers to components,
-    // handle state change in components with ()=>void type 
     return (
         <div>
             <h2>Phonebook</h2>
+
             <Filter filter={filter} handler={handleFilter} />
+
             <h3>Add a new</h3>
+
             <ContactForm name={newName} number={newNumber} nameChanger={handleNameChange} numberChanger={handleNumberChange} addPerson={addPerson} />
-            {/* <form onSubmit={addPerson}> */}
-            {/*     <div> */}
-            {/*         name: <input value={newName} onChange={handleNameChange} /> */}
-            {/*     </div> */}
-            {/*     <div> */}
-            {/*         number: <input value={newNumber} onChange={handleNumberChange} /> */}
-            {/*     </div> */}
-            {/*     <div> */}
-            {/*         <button type="submit">add</button> */}
-            {/*     </div> */}
-            {/* </form> */}
+
             <h3>Numbers</h3>
+
             <Persons personArr={persons} filter={filter} />
         </div >
 
