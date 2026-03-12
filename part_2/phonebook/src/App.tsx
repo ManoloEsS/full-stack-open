@@ -12,8 +12,6 @@ const App = () => {
     const [newName, setNewName] = useState('')
     const [newNumber, setNewNumber] = useState('')
     const [filter, setFilter] = useState("")
-    // Notification state holds an object with { message, isError } or null when empty.
-    // Initialize explicitly with null to match the NotificationProps shape.
     const [notification, setNotification] = useState<NotificationObj | null>(null)
 
     useEffect(() => {
@@ -27,12 +25,10 @@ const App = () => {
     const addPerson = (event: any) => {
         event.preventDefault()
         if (newName === "") {
-            // Validate and show error notification using NotificationObj shape
-            const newNotif = {
+            setNotification({
                 message: `Name field cannot be empty`,
                 isError: true,
-            }
-            setNotification(newNotif)
+            })
             setTimeout(() => {
                 setNotification(null)
             }, 5000)
@@ -40,12 +36,10 @@ const App = () => {
         }
 
         if (newNumber === "") {
-            // Validate and show error notification using NotificationObj shape
-            const newNotif = {
+            setNotification({
                 message: `Number field cannot be empty`,
                 isError: true,
-            }
-            setNotification(newNotif)
+            })
             setTimeout(() => {
                 setNotification(null)
             }, 5000)
@@ -69,15 +63,13 @@ const App = () => {
                     .updatePerson(personUpdated)
                     .then((updated) => {
                         setPersons(persons.map((person) => person.id !== updated.id ? person : updated))
-                        // Use the NotificationObj shape (message + isError) instead of a raw string.
                         setNotification({ message: `${updated.name}'s number has been updated to ${updated.number}`, isError: false })
                         setTimeout(() => {
                             setNotification(null)
                         }, 5000)
                     })
                     .catch((_error) => {
-                        // Server-side removal is an error condition, set isError: true.
-                        setNotification({ message: `inoformation of ${newName} has already been removed from the server`, isError: true })
+                        setNotification({ message: `Information of ${newName} has already been removed from the server`, isError: true })
                         setTimeout(() => {
                             setNotification(null)
                         }, 5000)
@@ -93,7 +85,6 @@ const App = () => {
                 .createPerson(personObj)
                 .then(person => {
                     setPersons(persons.concat(person))
-                    // Normal (non-error) notification when a person is added.
                     setNotification({ message: `Added ${person.name}`, isError: false })
                     setTimeout(() => {
                         setNotification(null)
@@ -127,7 +118,6 @@ const App = () => {
                 .deletePerson(person)
                 .then(deleted => {
                     setPersons(persons.filter((person => person.id !== deleted.id)))
-                    // Normal (non-error) notification when a person is deleted.
                     setNotification({ message: `Deleted ${person.name}`, isError: false })
                     setTimeout(() => {
                         setNotification(null)
