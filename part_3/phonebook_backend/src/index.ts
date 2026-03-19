@@ -1,7 +1,25 @@
+// used this type of import to be able to use express types with TS
 import express, { Response, Request } from 'express'
+const morgan = require('morgan')
 const app = express()
 
+
 app.use(express.json())
+
+morgan.token('person', (req: Request) => {
+    if (!req.body || typeof req.body !== 'object') {
+        return '';
+    }
+    return JSON.stringify({ name: req.body.name, number: req.body.number })
+})
+
+app.use((req, res, next) => {
+    if (req.method === 'POST') {
+        morgan(':method :url :status :res[content-length] - :response-time ms :person')(req, res, next)
+    } else {
+        morgan('tiny')(req, res, next)
+    }
+})
 
 let persons = [
     {
@@ -25,6 +43,7 @@ let persons = [
         "number": "39-23-6423122"
     }
 ]
+
 
 app.get('/api/persons', (_req: Request, res: Response) => {
     res.json(persons)
