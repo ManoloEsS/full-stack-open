@@ -4,7 +4,9 @@ const morgan = require('morgan')
 const app = express()
 
 
+app.use(express.static('dist'))
 app.use(express.json())
+
 
 morgan.token('person', (req: Request) => {
     if (!req.body || typeof req.body !== 'object') {
@@ -13,6 +15,7 @@ morgan.token('person', (req: Request) => {
     return JSON.stringify({ name: req.body.name, number: req.body.number })
 })
 
+// morgan logger
 app.use((req, res, next) => {
     if (req.method === 'POST') {
         morgan(':method :url :status :res[content-length] - :response-time ms :person')(req, res, next)
@@ -102,13 +105,19 @@ app.post('/api/persons/', (req: Request, res: Response) => {
     res.json(person)
 })
 
+const unknownEndpoint = (request: Request, response: Response) => {
+    response.status(404).send({ error: 'unknown endpoint' })
+}
+
+app.use(unknownEndpoint)
+
 function getRandomInt(min: number, max: number) {
     const minCeiled = Math.ceil(min);
     const maxFloored = Math.floor(max);
     return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled);
 }
 
-const PORT = 3001
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
