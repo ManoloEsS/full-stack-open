@@ -1,7 +1,7 @@
 const mongoose = require('mongoose')
 
 
-if (process.argv.length !== 3 || process.argv.length !== 5) {
+if (process.argv.length !== 3 && process.argv.length !== 5) {
     console.log('usage\nadd person: node mongo.js <password> <name> <number>\nlist all: node mongo.js <password>')
     process.exit(1)
 }
@@ -25,8 +25,8 @@ if (process.argv.length === 3) {
         .then(persons => {
             persons.forEach(p => {
                 console.log(p)
-                mongoose.connection.close()
             })
+            mongoose.connection.close()
         })
 } else if (process.argv.length === 5) {
     const personName = process.argv[3]
@@ -40,7 +40,7 @@ if (process.argv.length === 3) {
     })
 
     person.save().then(result => {
-        console.log(result)
+        console.log(`added ${result.name} number ${result.number} to phonebook`)
         mongoose.connection.close()
     })
 }
