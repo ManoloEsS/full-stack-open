@@ -1,10 +1,10 @@
-# fly.toml app configuration file generated for phonebook-manoloess on 2026-03-21T21:39:18-06:00
+# fly.toml app configuration file generated for phonebook-backend-icy-grass-8193 on 2026-03-24T22:48:54-06:00
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'phonebook-manoloess'
-primary_region = 'dfw'
+app = 'phonebook-backend-icy-grass-8193'
+primary_region = 'ewr'
 
 [build]
 
@@ -12,7 +12,7 @@ primary_region = 'dfw'
   PORT = "3001"
 
 [http_service]
-  internal_port = 3000
+  internal_port = 3001
   force_https = true
   auto_stop_machines = 'stop'
   auto_start_machines = true
