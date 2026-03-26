@@ -47,17 +47,19 @@ const App = () => {
             return
         }
 
-        if (persons.find((person) => person.name === newName)) {
-            const personUpdate = persons.filter((person) => person.name === newName)
+        // CHANGED: Use .find() instead of .filter()[0] - more efficient
+        const personUpdate = persons.find((person) => person.name === newName)
+        if (personUpdate) {
             const confirmed = confirm(
                 `${newName} is already added to phonebook, replace the old number with a new one?`
             )
 
+            // update person
             if (confirmed) {
                 const personUpdated = {
-                    name: personUpdate[0].name,
+                    name: personUpdate.name,
                     number: newNumber,
-                    id: personUpdate[0].id
+                    id: personUpdate.id
                 }
                 personService
                     .updatePerson(personUpdated)
@@ -67,15 +69,31 @@ const App = () => {
                         setTimeout(() => {
                             setNotification(null)
                         }, 5000)
+                        // CHANGED: Clear form only AFTER successful update
+                        setNewName("")
+                        setNewNumber("")
                     })
-                    .catch((_error) => {
-                        setNotification({ message: `Information of ${newName} has already been removed from the server`, isError: true })
-                        setTimeout(() => {
-                            setNotification(null)
-                        }, 5000)
-
+                    .catch((error) => {
+                        // CHANGED: Added optional chaining to handle missing response (network errors, etc.)
+                        const errors = error.response?.data?.errors
+                        if (errors?.name) {
+                            setNotification({ message: `Name field has to be at least 3 characters long`, isError: true })
+                            setTimeout(() => {
+                                setNotification(null)
+                            }, 5000)
+                        }
+                        if (errors?.number) {
+                            setNotification({ message: `Number format is invalid`, isError: true })
+                            setTimeout(() => {
+                                setNotification(null)
+                            }, 5000)
+                        }
                     })
+            } else {
+                setNewName("")
+                setNewNumber("")
             }
+            // create new person
         } else {
             const personObj = {
                 name: newName,
@@ -89,14 +107,29 @@ const App = () => {
                     setTimeout(() => {
                         setNotification(null)
                     }, 5000)
+                    // CHANGED: Clear form only AFTER successful creation
+                    setNewName("")
+                    setNewNumber("")
                 })
                 .catch((error) => {
-                    alert(`${error}`)
+                    // CHANGED: Added optional chaining to handle missing response
+                    const errors = error.response?.data?.errors
+                    console.log(errors)
+                    if (errors?.name) {
+                        setNotification({ message: `Name field has to be at least 3 characters long`, isError: true })
+                        setTimeout(() => {
+                            setNotification(null)
+                        }, 5000)
+                    }
+                    if (errors?.number) {
+                        setNotification({ message: `Number format is invalid`, isError: true })
+                        setTimeout(() => {
+                            setNotification(null)
+                        }, 5000)
+                    }
+
                 })
         }
-
-        setNewName("")
-        setNewNumber("")
     }
 
     const handleNameChange = (event: any) => {

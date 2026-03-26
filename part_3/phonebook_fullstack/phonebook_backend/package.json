@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build:ui": "cd ../phonebook_frontend/ && npm run build",
+    "build:full": "rm -rf dist && npm run build && npm run build:ui",
+    "build:dev": "npm run build:full && npm run dev",
     "deploy": "fly deploy",
     "deploy:full": "rm -rf dist && npm run build && npm run build:ui && npm run deploy",
     "logs:prod": "fly logs",

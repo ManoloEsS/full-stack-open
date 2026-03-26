@@ -3,6 +3,7 @@ import express, { Response, Request, NextFunction } from 'express'
 import morgan from 'morgan'
 //importing Person starts db connection
 import Person from './models/person'
+import Mongoose from 'mongoose'
 
 // express app
 const app = express()
@@ -70,23 +71,8 @@ app.delete('/api/persons/:id', (req: Request, res: Response, next: NextFunction)
 })
 
 // add one
-app.post('/api/persons/', (req: Request, res: Response) => {
+app.post('/api/persons/', (req: Request, res: Response, next: NextFunction) => {
     const personData = req.body
-    if (!personData) {
-        return res.status(400).json({ error: 'content missing' })
-    }
-
-    if (!personData.name) {
-        return res.status(400).json({
-            error: 'name required'
-        })
-    }
-
-    if (!personData.number) {
-        return res.status(400).json({
-            error: 'number required'
-        })
-    }
 
     const newPerson = new Person({
         name: personData.name,
@@ -97,33 +83,13 @@ app.post('/api/persons/', (req: Request, res: Response) => {
         .then(savedPerson => {
             res.json(savedPerson)
         })
-        //person schema does not allow for non unique names (defensive programming)
-        .catch(error => {
-            console.log(error)
-            res.status(400).json({ error: 'name must be unique' })
-
-        })
+        .catch(error => next(error))
 
 })
 
-app.put('/api/persons/:id', (req: Request, res: Response) => {
+app.put('/api/persons/:id', (req: Request, res: Response, next: NextFunction) => {
     const personId = req.params.id
     const personData = req.body
-    if (!personData) {
-        return res.status(400).json({ error: 'content missing' })
-    }
-
-    if (!personData.name) {
-        return res.status(400).json({
-            error: 'name required'
-        })
-    }
-
-    if (!personData.number) {
-        return res.status(400).json({
-            error: 'number required'
-        })
-    }
 
     Person.findById(personId)
         .then(personToUpdate => {
@@ -139,12 +105,7 @@ app.put('/api/persons/:id', (req: Request, res: Response) => {
                 })
             }
         })
-        .catch(error => {
-            console.log(error)
-            return res.status(500).json({
-                error: `could not update ${personData.name}`
-            })
-        })
+        .catch(error => next(error))
 
 })
 
@@ -155,12 +116,14 @@ const unknownEndpoint = (req: Request, res: Response) => {
 }
 app.use(unknownEndpoint)
 
-// middleware for error handling
-const errorHandler = (error: Error, req: Request, res: Response, next: NextFunction) => {
+const errorHandler = (error: Mongoose.Error, req: Request, res: Response, next: NextFunction) => {
     console.error(error.message)
 
     if (error.name === 'CastError') {
         return res.status(400).send({ error: 'malformatted id' })
+    } else if (error.name === 'ValidationError') {
+        const mongooseError = error as Mongoose.Error.ValidationError
+        return res.status(400).json({ errors: mongooseError.errors })
     }
     next(error)
 }
