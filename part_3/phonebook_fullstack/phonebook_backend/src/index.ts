@@ -14,7 +14,7 @@ app.use(express.json())
 // morgan logger
 morgan.token('person', (req: Request) => {
     if (!req.body || typeof req.body !== 'object') {
-        return '';
+        return ''
     }
     return JSON.stringify({ name: req.body.name, number: req.body.number })
 })
