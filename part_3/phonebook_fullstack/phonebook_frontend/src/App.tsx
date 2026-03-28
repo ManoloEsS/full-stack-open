@@ -47,7 +47,6 @@ const App = () => {
             return
         }
 
-        // CHANGED: Use .find() instead of .filter()[0] - more efficient
         const personUpdate = persons.find((person) => person.name === newName)
         if (personUpdate) {
             const confirmed = confirm(
@@ -69,12 +68,10 @@ const App = () => {
                         setTimeout(() => {
                             setNotification(null)
                         }, 5000)
-                        // CHANGED: Clear form only AFTER successful update
                         setNewName("")
                         setNewNumber("")
                     })
                     .catch((error) => {
-                        // CHANGED: Added optional chaining to handle missing response (network errors, etc.)
                         const errors = error.response?.data?.errors
                         if (errors?.name) {
                             setNotification({ message: `Name field has to be at least 3 characters long`, isError: true })
@@ -107,12 +104,10 @@ const App = () => {
                     setTimeout(() => {
                         setNotification(null)
                     }, 5000)
-                    // CHANGED: Clear form only AFTER successful creation
                     setNewName("")
                     setNewNumber("")
                 })
                 .catch((error) => {
-                    // CHANGED: Added optional chaining to handle missing response
                     const errors = error.response?.data?.errors
                     console.log(errors)
                     if (errors?.name) {

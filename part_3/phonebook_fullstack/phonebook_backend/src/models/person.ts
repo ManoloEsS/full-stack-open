@@ -1,18 +1,5 @@
-import dotenv from 'dotenv'
-dotenv.config()
 import mongoose from 'mongoose'
-mongoose.set('strictQuery', false)
 
-const url = process.env.MONGODB_URI as string
-
-console.log('connecting to MongoDB')
-mongoose.connect(url, { family: 4 })
-    .then(() => {
-        console.log('connected to MongoDB')
-    })
-    .catch((error: Error) => {
-        console.log('error connecting to MongoDB: ', error.message)
-    })
 
 const personSchema = new mongoose.Schema({
     name: {
@@ -40,7 +27,7 @@ personSchema.set('toJSON', {
     }
 })
 
-export default mongoose.model('Person', personSchema)
+export const Person = mongoose.model('Person', personSchema)
 
 
 
