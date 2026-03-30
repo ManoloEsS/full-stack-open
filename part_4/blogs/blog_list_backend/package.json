@@ -4,20 +4,22 @@
   "description": "",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "cross-env NODE_ENV=development tsx watch src/index.ts",
+    "start": "cross-env NODE_ENV=production node dist/index.js",
+    "test": "cross-env NODE_ENV=test tsx --test src/tests/*.test.ts",
     "build": "npx tsc",
-    "start": "node dist/index.js",
     "lint": "eslint .",
     "build:ui": "cd ../blog_list_frontend/ && npm run build",
-    "build:full": "rm -rf dist && npm run build && npm run build:ui",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build:full": "rm -rf dist && npm run build && npm run build:ui"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "cross-env": "^10.1.0",
     "dotenv": "^17.3.1",
     "express": "^5.2.1",
+    "lodash": "^4.17.23",
     "mongoose": "^9.3.3",
     "morgan": "^1.10.1"
   },
@@ -25,10 +27,13 @@
     "@eslint/js": "^10.0.1",
     "@stylistic/eslint-plugin": "^5.10.0",
     "@types/express": "^5.0.6",
+    "@types/lodash": "^4.17.24",
     "@types/morgan": "^1.9.10",
     "@types/node": "^25.5.0",
+    "@types/supertest": "^7.2.0",
     "eslint": "^10.1.0",
     "globals": "^17.4.0",
+    "supertest": "^7.2.2",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.57.2"

@@ -9,6 +9,7 @@ morgan.token('body', (req: Request) => {
 })
 
 export const requestLogger = (req: Request, res: Response, next: NextFunction) => {
+    if (process.env.NODE_ENV === 'test') { return next() }
     if (req.method === 'POST') {
         morgan(':method :url :status :res[content-length] - :response-time ms :body')(req, res, next)
     } else {

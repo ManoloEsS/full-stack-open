@@ -3,7 +3,7 @@ import mongoose from 'mongoose'
 import { logInfo, logError } from './utils/logger'
 import { MONGODB_URI } from './utils/config'
 import { requestLogger, unknownEndpoint, errorHandler } from './utils/middleware'
-import { blogsRouter } from './controllers/blogs'
+import { blogsRouter, healthRouter } from './controllers/blogs'
 
 mongoose.set('strictQuery', false)
 
@@ -24,7 +24,9 @@ mongoose
 app.use(express.json())
 app.use(requestLogger)
 
-app.use('/', blogsRouter)
+app.use('/health', healthRouter)
+app.use('/api/blogs', blogsRouter)
+
 
 app.use(unknownEndpoint)
 app.use(errorHandler)

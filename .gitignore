@@ -140,3 +140,5 @@ vite.config.ts.timestamp-*
 
 js_cheat_sheet.md
 react_example/
+
+tmp/
