@@ -1,4 +1,4 @@
-import { BlogModel } from "../models/blog"
+import { BlogModel, Blog } from "../models/blog"
 export const initialBlogs = [
     {
         title: 'hello',
@@ -22,5 +22,13 @@ export const initialBlogs = [
 
 export const blogsInDb = async () => {
     const blogs = await BlogModel.find({})
-    return blogs.map(blog => blog.toJSON())
+    return blogs.map(blog => blog.toJSON() as Blog)
+}
+
+export const validNonExistingId = async () => {
+    const blog = new BlogModel({ title: "bye", author: "fye", url: "some.url" })
+    await blog.save()
+    await blog.deleteOne()
+
+    return blog.id.toString()
 }

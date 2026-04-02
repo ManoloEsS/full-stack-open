@@ -1,4 +1,5 @@
 import express, { Response, Request } from 'express'
+import mongoose from 'mongoose'
 import { BlogModel } from '../models/blog'
 
 export const blogsRouter = express.Router()
@@ -11,24 +12,61 @@ blogsRouter.get('/', async (_req, res) => {
 
 blogsRouter.get('/:id', async (req, res) => {
     const id = req.params.id
-    const blog = await BlogModel.findById(id)
-
-    res.json(blog)
+    try {
+        const blog = await BlogModel.findById(id)
+        if (blog === null) {
+            return res.status(404).json({ error: 'blog not found' })
+        }
+        return res.json(blog)
+    } catch (error) {
+        return res.status(400).json({ error: 'invalid id' })
+    }
 })
 
-blogsRouter.post('/', async (req, res) => {
-    // accidentaly sent a req with test content type and 
-    // it saves the id with no blog content
-    // now it validates content type is json
-    const contentType = req.get('content-type')
-    if (!contentType?.includes('application/json')) {
-        return res.status(415).json({ error: 'unsupported media type' })
+blogsRouter.post('/', async (req, res, next) => {
+    try {
+        const contentType = req.get('content-type')
+
+        if (!contentType?.includes('application/json')) {
+            return res.status(415).json({ error: 'unsupported media type' })
+        }
+
+        const blog = new BlogModel(req.body)
+        const result = await blog.save()
+
+        res.status(201).json(result)
+
+    } catch (error: unknown) {
+        if (error instanceof mongoose.Error.ValidationError) {
+            res.status(400).json({ error: error.message })
+        } else {
+            next(error)
+        }
+
     }
+})
 
-    const blog = new BlogModel(req.body)
+blogsRouter.delete('/:id', async (req, res) => {
+    await BlogModel.findByIdAndDelete(req.params.id)
 
-    const result = await blog.save()
-    res.status(201).json(result)
+    res.status(204).end()
+})
+
+blogsRouter.put('/:id', async (req, res, next) => {
+    try {
+        const { likes } = req.body
+        const toUpdate = await BlogModel.findByIdAndUpdate(req.params.id)
+        if (!toUpdate) {
+            return res.status(404).json({ error: 'not found' })
+        }
+
+        toUpdate.likes = likes
+
+        await toUpdate.save()
+        res.json(toUpdate)
+    } catch (error) {
+        next(error)
+    }
 })
 
 export const healthRouter = express.Router()
