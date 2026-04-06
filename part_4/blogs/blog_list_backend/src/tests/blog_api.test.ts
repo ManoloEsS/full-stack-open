@@ -4,16 +4,40 @@ import mongoose from 'mongoose'
 import supertest from 'supertest'
 import { app } from '../app'
 import { BlogModel, Blog } from '../models/blog'
-import { initialBlogs, blogsInDb, validNonExistingId } from './test_helper'
+import { UserModel } from '../models/user'
+import { initialBlogs, blogsInDb, validNonExistingIdBlog, insertInitialBlogsWithUser } from './test_helper'
+import { first } from 'lodash'
 
 
 
-const api = supertest(app)
+const blogApi = supertest(app)
+let token: string
+let testUserId: mongoose.ObjectId
 
 
 beforeEach(async () => {
     await BlogModel.deleteMany({})
-    await BlogModel.insertMany(initialBlogs)
+    await UserModel.deleteMany({})
+
+    const userResponse = await blogApi
+        .post('/api/users')
+        .send({ username: 'monchicho', password: 'password' })
+
+
+    const loginResponse = await blogApi
+        .post('/api/login')
+        .send({ username: 'monchicho', password: 'password' })
+
+    token = loginResponse.body.token
+
+    for (const b of initialBlogs) {
+        await blogApi
+            .post('/api/blogs')
+            .set('Authorization', `Bearer ${token}`)
+            .send(b)
+    }
+
+    testUserId = userResponse.body.id
 
     // promise array, Promise.all waits until all promises are resolved
     // const blogObjects = initialBlogs
@@ -24,19 +48,19 @@ beforeEach(async () => {
 
 describe('getting all blogs', () => {
     test('get request to get all returns json', async () => {
-        await api
+        await blogApi
             .get('/api/blogs')
             .expect(200)
             .expect('Content-Type', /application\/json/)
     })
 
     test('get request to get all returns correct amount of blogs', async () => {
-        const response = await api.get('/api/blogs')
+        const response = await blogApi.get('/api/blogs')
         assert.strictEqual(response.body.length, initialBlogs.length)
     })
 
     test('unique identifier of blog posts is id', async () => {
-        const response = await api.get('/api/blogs')
+        const response = await blogApi.get('/api/blogs')
         response.body.forEach((element: any) => {
             assert.ok(element.id && !element._id)
         });
@@ -46,20 +70,24 @@ describe('getting all blogs', () => {
 describe('getting single blog', () => {
     test('succeeds with valid id', async () => {
         const notesAtStart = await blogsInDb()
-        const firstNote = notesAtStart[0]
+        const firstBlog = notesAtStart[0]
 
-        const retrieved = await api
-            .get(`/api/blogs/${firstNote.id}`)
+        const retrieved = await blogApi
+            .get(`/api/blogs/${firstBlog.id}`)
             .expect(200)
             .expect('Content-Type', /application\/json/)
 
-        assert.deepStrictEqual(firstNote, retrieved.body)
+        assert.strictEqual(retrieved.body.id, firstBlog.id)
+        assert.strictEqual(retrieved.body.title, firstBlog.title)
+        assert.strictEqual(retrieved.body.author, firstBlog.author)
+        assert.strictEqual(retrieved.body.url, firstBlog.url)
+        assert.strictEqual(retrieved.body.likes, firstBlog.likes)
     })
 
-    test('fails with status 404 if note does not exist', async () => {
-        const deletedButValid = await validNonExistingId()
+    test('fails with status 404 if blog does not exist', async () => {
+        const deletedButValid = await validNonExistingIdBlog()
 
-        await api
+        await blogApi
             .get(`/api/blogs/${deletedButValid}`)
             .expect(404)
     })
@@ -67,14 +95,15 @@ describe('getting single blog', () => {
     test('fails with statuscode 400 id is invalid', async () => {
         const invalidId = '5a3d5da59070081a82a3445'
 
-        await api.get(`/api/blogs/${invalidId}`).expect(400)
+        await blogApi.get(`/api/blogs/${invalidId}`).expect(400)
     })
 })
 
 describe('creating new blog', () => {
     test('post request with text content returns unsupported media resp', async () => {
-        await api
+        await blogApi
             .post('/api/blogs')
+            .set('Authorization', `Bearer ${token}`)
             .send('name: json')
             .expect(415)
     })
@@ -87,17 +116,19 @@ describe('creating new blog', () => {
             likes: 5,
         }
 
-        await api
+        await blogApi
             .post('/api/blogs')
+            .set('Authorization', `Bearer ${token}`)
             .send(newblog)
             .expect(201)
 
-        const updatedBlogs = await api.get('/api/blogs')
+        const updatedBlogs = await blogApi.get('/api/blogs')
 
         assert.strictEqual(updatedBlogs.body.length, initialBlogs.length + 1)
     })
 
     test('created blog is in database', async () => {
+
         const newblog: Blog = {
             title: 'temp',
             author: 'me',
@@ -105,9 +136,12 @@ describe('creating new blog', () => {
             likes: 5,
         }
 
-        const createdBlog = await api.post('/api/blogs').send(newblog)
+        const createdBlog = await blogApi
+            .post('/api/blogs')
+            .send(newblog)
+            .set('Authorization', `Bearer ${token}`)
 
-        const retrievedBlog = await api.get(`/api/blogs/${createdBlog.body.id}`)
+        const retrievedBlog = await blogApi.get(`/api/blogs/${createdBlog.body.id}`)
 
         assert.deepStrictEqual(retrievedBlog.body, createdBlog.body)
     })
@@ -119,7 +153,11 @@ describe('creating new blog', () => {
             url: 'some.url',
         }
 
-        const createdBlog = await api.post('/api/blogs').send(newBlog)
+        const createdBlog = await blogApi
+            .post('/api/blogs')
+            .send(newBlog)
+            .set('Authorization', `Bearer ${token}`)
+
 
         assert.strictEqual(createdBlog.body.likes, 0)
     })
@@ -131,9 +169,10 @@ describe('creating new blog', () => {
             likes: 5
         }
 
-        await api
+        await blogApi
             .post('/api/blogs')
             .send(noTitleBlog)
+            .set('Authorization', `Bearer ${token}`)
             .expect(400)
     })
 
@@ -144,10 +183,24 @@ describe('creating new blog', () => {
             likes: 5
         }
 
-        await api
+        await blogApi
             .post('/api/blogs')
             .send(noAuthorBlog)
+            .set('Authorization', `Bearer ${token}`)
             .expect(400)
+    })
+
+    test('post request missing token returns 401 status code', async () => {
+        const newBlog = {
+            title: 'temp',
+            author: 'me',
+            url: 'some.url',
+        }
+
+        await blogApi
+            .post('/api/blogs')
+            .send(newBlog)
+            .expect(401)
     })
 })
 
@@ -155,11 +208,12 @@ describe('creating new blog', () => {
 describe('deleting single blog post', () => {
     test('succesfully deleting single blog post', async () => {
         const savedBlogs = await blogsInDb()
-        await api
+        await blogApi
             .delete(`/api/blogs/${savedBlogs[0].id}`)
+            .set('Authorization', `Bearer ${token}`)
             .expect(204)
 
-        const afterDel = await api.get('/api/blogs')
+        const afterDel = await blogApi.get('/api/blogs')
 
         assert.strictEqual(afterDel.body.length, initialBlogs.length - 1)
     })
@@ -175,11 +229,11 @@ describe('updating a single blog', () => {
 
         const id = savedBlogs[0].id
 
-        await api
+        await blogApi
             .put(`/api/blogs/${id}`)
             .send(newLikes)
 
-        const afterUpdate = await api.get(`/api/blogs/${id}`)
+        const afterUpdate = await blogApi.get(`/api/blogs/${id}`)
 
         assert.strictEqual(afterUpdate.body.likes, 100)
     })

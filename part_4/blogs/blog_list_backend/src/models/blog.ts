@@ -2,8 +2,8 @@ import mongoose from 'mongoose'
 
 export interface Blog {
     id?: string
+    author?: string
     title: string
-    author: string
     url: string
     likes: number
 }
@@ -23,6 +23,10 @@ const blogSchema = new mongoose.Schema({
     likes: {
         type: Number,
         default: 0,
+    },
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
     }
 })
 
