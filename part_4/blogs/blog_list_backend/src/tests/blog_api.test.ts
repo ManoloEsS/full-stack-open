@@ -5,8 +5,7 @@ import supertest from 'supertest'
 import { app } from '../app'
 import { BlogModel, Blog } from '../models/blog'
 import { UserModel } from '../models/user'
-import { initialBlogs, blogsInDb, validNonExistingIdBlog, insertInitialBlogsWithUser } from './test_helper'
-import { first } from 'lodash'
+import { initialBlogs, blogsInDb, validNonExistingIdBlog, } from './test_helper'
 
 
 
