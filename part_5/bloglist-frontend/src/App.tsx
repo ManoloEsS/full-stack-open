@@ -172,16 +172,24 @@ const App = () => {
           </div>
         ) : (
           <div>
-          <p>{user.name} logged in <button onClick={handleLogout}>logout</button></p>
-              <div>
-                {newBlog()}
-              </div>
-              <div>
-                {blogList()}
-              </div>
+            <p>{user.name} logged in <button onClick={handleLogout}>logout</button></p>
+            <Toggleable buttonLabel="create new blog">
+              <NewBlog
+                handleNewBlog={handleNewBlog}
+                handleTitleChange={({ target }) => setTitle(target.value)}
+                handleAuthorChange={({ target }) => {setAuthor(target.value)}}
+                handleUrlChange={({ target }) => {setUrl(target.value)}}
+                title={title}
+                author={author}
+                url={url}
+              />
+            </Toggleable>
+            <div>
+              {blogList()}
+            </div>
           </div>
         )
-      }
+        }
       </div>
     </div>
   )
